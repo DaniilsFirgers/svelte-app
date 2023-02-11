@@ -1,7 +1,17 @@
 <script>
   import { createEventDispatcher } from 'svelte'
+  import { onDestroy } from 'svelte'
+  import { onMount } from 'svelte'
+
+  onMount(() => console.log('The modal has been mounted'))
+  onDestroy(() => {
+    console.log('The modal has been destroyed')
+  })
+
+
 
   let dispatch = createEventDispatcher()
+
   let name
   let beltColor
   let age

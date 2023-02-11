@@ -4,6 +4,12 @@
   import PersonOuter from './PersonOuter.svelte'
   import CustomButton from './CustomButton.svelte'
   import axios from 'axios'
+  import { onMount, beforeUpdate, afterUpdate, tick } from 'svelte'
+
+  let count = 0
+  $: double = count * 2
+  let previousCount = 0
+  let backgroundColor: string = 'red'
   let people: {
     name: string
     beltColor: string
@@ -32,7 +38,6 @@
       mood: moods[Math.floor(Math.random() * moods.length - 1)],
     }))
     people = newPeople
-    console.log(people)
   }
 
   const addPerson = (event) => {
@@ -46,10 +51,15 @@
   async function testReq() {
     const res = await axios.get('https://jsonplaceholder.typicode.com/todos/1')
     const data = await res.data
-    console.log(data)
     obj = data
     return data
   }
+  async function onMountTestReq() {
+    const res = await axios.get('https://jsonplaceholder.typicode.com/todos/1')
+    const data = await res.data
+    console.log('from onMount', data)
+  }
+  onMount(() => onMountTestReq())
 
   let personPromise = testReq()
   function handlePersonReq() {
@@ -65,9 +75,24 @@
     console.log('Link clicked!')
   }
 
-  function handleCustomButton(event) {
-    console.log(event)
+  async function handleCustomButton(event) {
+    console.log('before tick', double)
+    await tick()
+    count += 1
   }
+
+  beforeUpdate(() => {
+    if (count !== previousCount) {
+      previousCount = count
+      console.log('count on beforeUpdate', count)
+    } else {
+      // no change in count, so no need to update the DOM
+      return false
+    }
+  })
+  afterUpdate(() => {
+    console.log('count on afterUpdate', count)
+  })
 </script>
 
 <Modal {showModal} on:click={toggleModal}>
@@ -95,7 +120,10 @@
 </div>
 <!-- Event modifiers -->
 
-<div on:click={handleDivClickPropagate}>
+<div
+  on:click={handleDivClickPropagate}
+  style="background-color: {backgroundColor}"
+>
   <a href="https://svelte.dev/tutorial/basics" on:click={handleLinkClick}
     >Click on the link</a
   >
@@ -103,6 +131,7 @@
 
 <!-- Custom Button Click -->
 <CustomButton on:click={handleCustomButton} />
+<h1>{double}</h1>
 
 <style>
   main {
