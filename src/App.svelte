@@ -1,21 +1,46 @@
 <script lang="ts">
-	let name: string ='Daniils'
-	let beltColor: string = 'black'
-	const handleClick=()=>{
-		beltColor='yellow'
+	import Modal from './Modal.svelte'
+	import AddPersonForm from './AddPersonForm.svelte';
+	let people = [
+		{name: 'Daniils', beltColor: 'yellow', age: 23, id: 2},
+		 {name: 'Nikita', beltColor: 'green', age: 20, id: 1}, 
+		 {name: 'Sam', beltColor: 'black', age: 26, id: 3}
+		 ]
+    const handleClick=(e:any, id:number)=>{
+		people = people.filter((person)=>person.id !== id)
 	}
-	const handleInput=(e)=>{
-		beltColor = e.target.value;
+	let showModal = false
+	const toggleModal=()=>{
+		showModal = !showModal
+	}
+
+	const addPerson=(event)=>{
+		const person = event.detail
+		people=[person, ...people]
+		showModal = false
 	}
 </script>
-
+<Modal  showModal={showModal} on:click={toggleModal}>
+	<AddPersonForm on:addPerson={addPerson}/>
+</Modal>
 <main>
-	<h1>Hello {name}!</h1>
-	<p style="color: {beltColor}">{beltColor}</p>
-	<button on:click={handleClick}>update belt colot</button>
-	<input type="text" on:input={handleInput} value={beltColor}>
-	<input type="text" bind:value={beltColor}>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
+	<!-- for each loop  -->
+<button on:click|once={toggleModal}>Open Modal</button>
+{#each people as person (person.id)}
+	<div>
+		<h4>{person.name}</h4>
+		{#if person.beltColor === 'black'}
+			<h1>Master Ninja</h1>
+		{/if}
+		<p>{person.age} years old, {person.beltColor} belt</p>
+		<button on:click={(e)=>
+			handleClick(e, person.id)
+		}>delete</button>
+	</div>
+	{:else}
+	<p>There are no people to show ...</p>
+{/each}
+
 </main>
 
 <style>
@@ -24,13 +49,6 @@
 		padding: 1em;
 		max-width: 240px;
 		margin: 0 auto;
-	}
-
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
 	}
 
 	@media (min-width: 640px) {
